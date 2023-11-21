@@ -1,188 +1,72 @@
 package com.example.apka_na_3
 
 
+
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.media.Image
 import android.os.Bundle
-import android.widget.Toast
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.DefaultShadowColor
-import androidx.compose.ui.layout.VerticalAlignmentLine
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.material3.Text
+import androidx.compose.ui.res.painterResource
 
-class MainActivity : ComponentActivity() {
-    private var showSecondScreen by mutableStateOf(false)
-    private var showThirdScreen by mutableStateOf(false)
-    private var showFourthScreen by mutableStateOf(false)
 
+class MainActivity : ComponentActivity(), SensorEventListener {
+    private lateinit var sensorManager: SensorManager
+    private var lightSensor: Sensor? = null
+    private var lightValue by mutableStateOf(0f)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
         setContent {
-            val context = LocalContext.current
-
-            Buttons(onOrangeClick = {
-                Toast.makeText(context, "Wybrany Charmander", Toast.LENGTH_SHORT).show()
-                showSecondScreen = true
-            }, onGreenClick = {
-                Toast.makeText(context, "Wybrany Bulbasaur", Toast.LENGTH_SHORT).show()
-                showThirdScreen = true
-            }, onLightBlueClick = {
-                Toast.makeText(context, "Wybrany Squirtle", Toast.LENGTH_SHORT).show()
-                showFourthScreen = true
-            })
-
-            if (showSecondScreen) {
-                SecondScreen()
-            } else if (showThirdScreen) {
-                ThirdScreen()
-            } else if (showFourthScreen) {
-                FourthScreen()
-            }
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Światła jest: $lightValue lx",
+                        fontSize = 20.sp
+                    )
+                }
         }
+
     }
 
-    @Composable
-    fun Buttons(onOrangeClick: () -> Unit, onGreenClick: () -> Unit, onLightBlueClick: () -> Unit) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-        horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Button(
-                onClick = onOrangeClick,
-                colors = ButtonDefaults.buttonColors(
-                    Color.Transparent,
-                    contentColor = Color.Black
-
-                )
-
-            ) {
-                Text(text = " Charmander ")
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = onGreenClick,
-                colors = ButtonDefaults.buttonColors(
-                    Color.Transparent,
-                    contentColor = Color.Black
-                )
-            ) {
-                Text(text = " Bulbasaur ")
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = onLightBlueClick,
-                colors = ButtonDefaults.buttonColors(
-                    Color.Transparent,
-                    contentColor = Color.Black
-                )
-            ) {
-                Text(text = " Squirtle ")
-            }
-        }
+    override fun onResume() {
+        super.onResume()
+        sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
-    @Composable
-    fun SecondScreen() {
-        val context = LocalContext.current
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = Color(0xFFEEA853)
-
-        ) {
-            Image(painter = painterResource(id = R.drawable.charmander), contentDescription = "")
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Buttons(onOrangeClick = {
-                    Toast.makeText(context, "Wybrany Charmander", Toast.LENGTH_SHORT).show()
-                    showThirdScreen = true
-                    showSecondScreen = false
-                }, onGreenClick = {
-                    Toast.makeText(context, "Wybrany Bulbasaur", Toast.LENGTH_SHORT).show()
-                    showThirdScreen = true
-                    showSecondScreen = false
-                }, onLightBlueClick = {
-                    Toast.makeText(context, "Wybrany Squirtle", Toast.LENGTH_SHORT).show()
-                    showFourthScreen = true
-                    showSecondScreen = false
-                })
-            }
-        }
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(this)
     }
 
-    @Composable
-    fun ThirdScreen() {
-        val context = LocalContext.current
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = Color(0xFF32E2A4)
-        ) {
-            Image(painter = painterResource(id = R.drawable.bulbasaur), contentDescription = "")
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Buttons(onOrangeClick = {
-                    Toast.makeText(context, "Wybrany Charmander", Toast.LENGTH_SHORT).show()
-                    showSecondScreen = true
-                    showThirdScreen = false
-                }, onGreenClick = {
-                    Toast.makeText(context, "Wybrany Bulbasaur", Toast.LENGTH_SHORT).show()
-                    showSecondScreen = true
-                    showThirdScreen = false
-                }, onLightBlueClick = {
-                    Toast.makeText(context, "Wybrany Squirtle", Toast.LENGTH_SHORT).show()
-                    showFourthScreen = true
-                    showThirdScreen = false
-                })
-            }
-        }
-    }
 
-    @Composable
-    fun FourthScreen() {
-        val context = LocalContext.current
-
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = Color(0xFF1AD8D8)
-        ) {
-            Image(painter = painterResource(id = R.drawable.squirtle), contentDescription = "")
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                // horizontalAlignment = Alignment.CenterVertically,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Buttons(onOrangeClick = {
-                    Toast.makeText(context, "Wybrany Charmander", Toast.LENGTH_SHORT).show()
-                    showSecondScreen = true
-                    showFourthScreen = false
-                }, onGreenClick = {
-                    Toast.makeText(context, "Wybrany Bulbasaur", Toast.LENGTH_SHORT).show()
-                    showThirdScreen = true
-                    showFourthScreen = false
-                }, onLightBlueClick = {
-                    Toast.makeText(context, "Wybrany Squirtle", Toast.LENGTH_SHORT).show()
-                })
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Screen Pink", color = Color.Black)
-            }
+    override fun onSensorChanged(event: SensorEvent?) {
+        if (event?.sensor?.type == Sensor.TYPE_LIGHT) {
+            val newLightValue = event.values[0]
+            Log.d("Light Sensor", "Swiatła jest : $newLightValue, ${R.drawable.bubla} lx")
+            lightValue = newLightValue
         }
     }
 }
+
